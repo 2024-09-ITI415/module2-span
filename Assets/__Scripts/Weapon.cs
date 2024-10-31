@@ -14,7 +14,7 @@ public enum WeaponType
     spread, // Two shots simultaneously
     phaser, // [NI] Shots that move in waves
     missile, // [NI] Homing missiles
-    laser, // [NI] Damage over time
+    laser, // [NI] Damage over time, [currently works like a blaster, but shoots faster]
     shield // Raise shieldLevel
 }
 
@@ -131,6 +131,10 @@ public class Weapon : MonoBehaviour {
                 p = MakeProjectile(); // Make left Projectile
                 p.transform.rotation = Quaternion.AngleAxis(-10, Vector3.back);
                 p.rigid.velocity = p.transform.rotation * vel;
+                break;
+            case WeaponType.laser:
+                p = MakeProjectile();
+                p.rigid.velocity = vel;
                 break;
         }
     }
