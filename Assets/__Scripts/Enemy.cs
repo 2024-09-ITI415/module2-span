@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour {
-
+public class Enemy : MonoBehaviour
+{
     [Header("Set in Inspector: Enemy")]
     public float speed = 10f; // The speed in m/s
     public float fireRate = 0.3f; // Seconds/shot (Unused)
@@ -14,12 +14,13 @@ public class Enemy : MonoBehaviour {
 
     [Header("Set Dynamically: Enemy")]
     public Color[] originalColors;
-    public Material[] materials;// All the Materials of this & its children
+    public Material[] materials; // All the Materials of this & its children
     public bool showingDamage = false;
     public float damageDoneTime; // Time to stop showing damage
     public bool notifiedOfDestruction = false; // Will be used later
 
     protected BoundsCheck bndCheck;
+    private ScoreManager scoreManager; // Correct capitalization
 
     private void Awake()
     {
@@ -27,30 +28,26 @@ public class Enemy : MonoBehaviour {
         // Get materials and colors for this GameObject and its children
         materials = Utils.GetAllMaterials(gameObject);
         originalColors = new Color[materials.Length];
-        for (int i=0; i<materials.Length; i++)
+        for (int i = 0; i < materials.Length; i++)
         {
             originalColors[i] = materials[i].color;
         }
+
+        scoreManager = FindObjectOfType<ScoreManager>(); // Correct capitalization
     }
 
     // This is a property: A method that acts like a field
     public Vector3 pos
     {
-        get
-        {
-            return (this.transform.position);
-        }
-        set
-        {
-            this.transform.position = value;
-        }
+        get { return (this.transform.position); }
+        set { this.transform.position = value; }
     }
 
     void Update()
     {
         Move();
 
-        if(showingDamage && Time.time > damageDoneTime)
+        if (showingDamage && Time.time > damageDoneTime)
         {
             UnShowDamage();
         }
@@ -87,8 +84,14 @@ public class Enemy : MonoBehaviour {
                 ShowDamage();
                 // Get the damage amount from the Main WEAP_DICT
                 health -= Main.GetWeaponDefinition(p.type).damageOnHit;
-                if(health <= 0)
+                if (health <= 0)
                 {
+                    // Tell the ScoreManager to add score points
+                    if (scoreManager != null && !notifiedOfDestruction)
+                    {
+                        scoreManager.AddScore(score);
+                    }
+
                     // Tell the Main singleton that this ship was destroyed
                     if (!notifiedOfDestruction)
                     {
@@ -99,11 +102,11 @@ public class Enemy : MonoBehaviour {
                     Destroy(this.gameObject);
                 }
                 Destroy(otherGO);
-                break;
+                break; // This break is essential to exit the switch after processing
 
             default:
                 print("Enemy hit by non-ProjectileHero: " + otherGO.name);
-                break;
+                break; // Ensure the default case also has a break
         }
     }
 
@@ -119,7 +122,7 @@ public class Enemy : MonoBehaviour {
 
     void UnShowDamage()
     {
-        for (int i=0; i<materials.Length; i++)
+        for (int i = 0; i < materials.Length; i++)
         {
             materials[i].color = originalColors[i];
         }
